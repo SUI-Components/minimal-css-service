@@ -4,6 +4,7 @@
  "description": "Get all the CSS from a page by passing a url. Uses Puppeteer to render the page with Chrome and traverse the DOM looking for link[rel=stylesheet] and style tags",
  "main": "index.js",
  "scripts": {
+   "deploy": "npx now",
   "dev": "nodemon dev.js"
  },
  "license": "MIT",
@@ -14,6 +15,7 @@
  "devDependencies": {
   "@s-ui/lint": "2",
   "nodemon": "1.18.10",
+  "now": "14.0.0",
   "puppeteer": "1.12.2"
  },
  "eslintConfig": {
