@@ -1,7 +1,7 @@
 {
 	"version": 2,
 	"public": true,
-	"alias": "minimal-css-service",
+	"alias": "critical-css-service",
 	"builds": [
 		{ "src": "public/*", "use": "@now/static" },
 		{
