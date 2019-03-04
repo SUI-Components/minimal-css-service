@@ -15,7 +15,14 @@ async function extractCssWithCoverageFromUrl({url, width, height, userAgent}) {
   await page.setViewport({width, height})
   await page.setUserAgent(userAgent)
   await page.coverage.startCSSCoverage()
-  await page.goto(url, {waitUntil: 'networkidle0'})
+  const response = await page.goto(url, {waitUntil: 'networkidle0'})
+
+  if (!response.ok()) {
+    throw new Error(
+      `Response status code for the url ${url} was ${response.status()}`
+    )
+  }
+
   const coverage = await page.coverage.stopCSSCoverage()
 
   let coveredCSS = ''
@@ -63,13 +70,13 @@ module.exports = async (req, res) => {
     const css = await extractCssWithCoverageFromUrl(
       Object.assign({}, {url}, devices[device])
     )
+
     res.statusCode = 200
     res.setHeader('Content-Type', 'text/css')
     return res.end(css)
   } catch (error) {
-    console.log(error)
+    console.error(error)
     res.statusCode = 400
-    res.setHeader('Content-Type', 'application/json')
-    return res.end(JSON.stringify(error, null, 2))
+    return res.end(error.toString())
   }
 }
