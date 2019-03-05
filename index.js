@@ -1,6 +1,7 @@
 const {ENV} = process.env
 const puppeteer = require(ENV && ENV === 'dev' ? 'puppeteer' : 'puppeteer-core')
 const chrome = require('chrome-aws-lambda')
+const cssPurge = require('css-purge')
 
 async function extractCssWithCoverageFromUrl({url, width, height, userAgent}) {
   // Setup a browser instance
@@ -35,8 +36,13 @@ async function extractCssWithCoverageFromUrl({url, width, height, userAgent}) {
   // Close the browser to close the connection and free up resources
   await browser.close()
 
-  // Turn the coverage into a usable format
-  return coveredCSS
+  // return minified css
+  return new Promise((resolve, reject) => {
+    cssPurge.purgeCSS(coveredCSS, {}, (err, result) => {
+      if (err) return reject(err)
+      resolve(result)
+    })
+  })
 }
 
 const devices = {
@@ -66,10 +72,16 @@ module.exports = async (req, res) => {
   const device = req.url.slice(1, 2)
   const url = req.url.slice(3)
 
+  // get the deviceInfo depending on the device path used, by default is mobile
+  const {width, height, userAgent} = devices[device] || devices.m
+
   try {
-    const css = await extractCssWithCoverageFromUrl(
-      Object.assign({}, {url}, devices[device])
-    )
+    const css = await extractCssWithCoverageFromUrl({
+      url,
+      width,
+      height,
+      userAgent
+    })
 
     res.statusCode = 200
     res.setHeader('Content-Type', 'text/css')
