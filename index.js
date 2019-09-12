@@ -2,8 +2,15 @@ const {ENV} = process.env
 const puppeteer = require(ENV && ENV === 'dev' ? 'puppeteer' : 'puppeteer-core')
 const chrome = require('chrome-aws-lambda')
 const cssPurge = require('css-purge')
+const querystring = require('querystring')
 
-async function extractCssWithCoverageFromUrl({url, width, height, userAgent}) {
+async function extractCssWithCoverageFromUrl({
+  url,
+  width,
+  height,
+  userAgent,
+  customHeaders
+}) {
   // Setup a browser instance
   const browser = await puppeteer.launch({
     args: chrome.args,
@@ -13,9 +20,12 @@ async function extractCssWithCoverageFromUrl({url, width, height, userAgent}) {
 
   // Create a new page and navigate to it
   const page = await browser.newPage()
+
   await page.setViewport({width, height})
   await page.setUserAgent(userAgent)
+  customHeaders && (await page.setExtraHTTPHeaders(customHeaders))
   await page.coverage.startCSSCoverage()
+
   const response = await page.goto(url, {waitUntil: 'networkidle0'})
 
   if (!response.ok()) {
@@ -66,12 +76,31 @@ const devices = {
   }
 }
 
+function getCustomHeaders(req) {
+  const urlParts = req.url.split('?')
+  const [, params = ''] = urlParts
+  const parsedParams = querystring.parse(params)
+  const headersToSend = parsedParams.headers && parsedParams.headers.split(',')
+  const customHeaders =
+    headersToSend &&
+    headersToSend.reduce((customHeaders, header) => {
+      const reqHeader = req.headers[header.toLowerCase()]
+
+      return {
+        ...customHeaders,
+        ...(reqHeader && {[header]: reqHeader})
+      }
+    }, {})
+
+  return customHeaders
+}
+
 module.exports = async (req, res) => {
   // https://critical-css.com/m/https://milanuncios.com
 
   const device = req.url.slice(1, 2)
   const url = req.url.slice(3)
-
+  const customHeaders = getCustomHeaders(req)
   // get the deviceInfo depending on the device path used, by default is mobile
   const {width, height, userAgent} = devices[device] || devices.m
 
@@ -80,7 +109,8 @@ module.exports = async (req, res) => {
       url,
       width,
       height,
-      userAgent
+      userAgent,
+      customHeaders
     })
 
     res.statusCode = 200
