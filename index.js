@@ -3,7 +3,13 @@ const puppeteer = require(ENV && ENV === 'dev' ? 'puppeteer' : 'puppeteer-core')
 const chrome = require('chrome-aws-lambda')
 const cssPurge = require('css-purge')
 
-async function extractCssWithCoverageFromUrl({url, width, height, userAgent}) {
+async function extractCssWithCoverageFromUrl({
+  url,
+  width,
+  height,
+  userAgent,
+  customHeaders
+}) {
   // Setup a browser instance
   const browser = await puppeteer.launch({
     args: chrome.args,
@@ -13,9 +19,12 @@ async function extractCssWithCoverageFromUrl({url, width, height, userAgent}) {
 
   // Create a new page and navigate to it
   const page = await browser.newPage()
+
   await page.setViewport({width, height})
   await page.setUserAgent(userAgent)
+  customHeaders && (await page.setExtraHTTPHeaders(customHeaders))
   await page.coverage.startCSSCoverage()
+
   const response = await page.goto(url, {waitUntil: 'networkidle0'})
 
   if (!response.ok()) {
@@ -71,7 +80,7 @@ module.exports = async (req, res) => {
 
   const device = req.url.slice(1, 2)
   const url = req.url.slice(3)
-
+  const customHeaders = req.headers
   // get the deviceInfo depending on the device path used, by default is mobile
   const {width, height, userAgent} = devices[device] || devices.m
 
@@ -80,14 +89,15 @@ module.exports = async (req, res) => {
       url,
       width,
       height,
-      userAgent
+      userAgent,
+      customHeaders
     })
 
     res.statusCode = 200
     res.setHeader('Content-Type', 'text/css')
     return res.end(css)
   } catch (error) {
-    console.error(error)
+    console.error(error) // eslint-disable-line
     res.statusCode = 400
     return res.end(error.toString())
   }
