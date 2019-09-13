@@ -20,7 +20,7 @@ Run `npm run dev` to run a local version of the function for local testing.
 
 ## Optional headers to the destination URL
 
-You can optionally add custom headers to the final URL that this service will navigate through. In order to achieve it you have to add all the custom HTTP headers you want to this service request:
+You can optionally add all the custom HTTP headers you want to this service request, that way your destination URL request will have also such headers. See the following example:
 
 ```
 GET: https://critical-css-service.now.sh/m/https://my-website.com/
