@@ -18,6 +18,19 @@ This package uses an actual browser under the hood to get all the CSS and expose
 I have no idea how local testing for Now is supposed to work, so I created a tiny HTTP server in `dev.js` that calls the actual function that gets deployed.
 Run `npm run dev` to run a local version of the function for local testing.
 
+## Optional headers to the destination URL
+
+You can optionally add all the custom HTTP headers you want to this service request, that way your destination URL request will have also such headers. See the following example:
+
+```
+GET: https://critical-css-service.now.sh/m/https://my-website.com/
+
+HEADERS:
+{
+	"X-Custom-Token": "123456"
+}
+```
+
 ## Deployment
 
 Using [Now](https://zeit.co/now): `now`.
