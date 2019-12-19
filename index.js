@@ -66,11 +66,23 @@ const devices = {
   }
 }
 
+const extractURLFrom = ({req}) => {
+  const {url: urlFromQuery} = req.query
+  if (urlFromQuery) return decodeURIComponent(urlFromQuery)
+  // extract from the url
+  return req.url.slice(3)
+}
+
 module.exports = async (req, res) => {
   // https://critical-css.com/m/https://milanuncios.com
 
   const device = req.url.slice(1, 2)
-  const url = req.url.slice(3)
+  const url = extractURLFrom({req})
+
+  if (url === '') {
+    res.statusCode = 400
+    return res.end('URL is required')
+  }
 
   // get the deviceInfo depending on the device path used, by default is mobile
   const {width, height, userAgent} = devices[device] || devices.m
