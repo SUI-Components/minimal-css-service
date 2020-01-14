@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Get all the CSS from a page by passing a url. Uses Puppeteer to render the page with Chrome and traverse the DOM looking for link[rel=stylesheet] and style tags",
   "main": "index.js",
-  "engines": { "node": "12.x" },
+  "engines": {
+    "node": "12.x"
+  },
   "scripts": {
     "deploy": "npx now",
     "dev": "ENV=dev nodemon dev.js"

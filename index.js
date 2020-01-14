@@ -95,7 +95,7 @@ const extractParamsFrom = req => {
 module.exports = async (req, res) => {
   const {customHeaders, device, url} = extractParamsFrom(req)
   // check if the url is empty to return an error
-  if (url === '') {
+  if (!url) {
     res.statusCode = 400
     return res.end('URL is required')
   }
