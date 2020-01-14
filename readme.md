@@ -1,17 +1,9 @@
 <div align="center">
-	<h1>Extract CSS</h1>
-	<p>Get all the CSS from a webpage.</p>
+	<h1>Minimal CSS Service</h1>
+	<p>Get the critical CSS from a website</p>
 </div>
 
 [![Platform: Now V2](https://img.shields.io/badge/platform-Now%20V2-50e3c2.svg)](https://zeit.co/now)
-
-## The problem
-
-The folks from [CSS Stats](https://cssstats.com/) have created [get-css](https://github.com/cssstats/cssstats/tree/master/packages/get-css), a package to get all the CSS from a given webpage. One downside, however, is that it only works for server side rendered applications.
-
-## The solution
-
-This package uses an actual browser under the hood to get all the CSS and exposes an HTTP endpoint that accepts a url to get the CSS from.
 
 ## Local testing
 
