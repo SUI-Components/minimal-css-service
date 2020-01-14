@@ -1,10 +1,10 @@
 const http = require('http')
-const url = require('url')
 const extractCssFromUrl = require('.')
 
 http
   .createServer((req, res) => {
-    req.query = url.parse(req.url, true).query
+    const url = new URL(req.url)
+    req.query = Object.fromEntries(url.searchParams.entries())
     return extractCssFromUrl(req, res)
   })
   .listen(1337, () => {

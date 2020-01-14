@@ -66,17 +66,6 @@ const extractCoveredCSSFrom = ({coverage}) => {
 }
 
 /**
- * Extract the URL param using query and url
- * @param {{query: object, url: string}} params
- */
-const extractURLFrom = ({query, url}) => {
-  const {url: urlFromQuery} = query
-  if (urlFromQuery) return decodeURIComponent(urlFromQuery)
-  // extract from the url
-  return url.slice(3)
-}
-
-/**
  * Extract all parameters from request object
  * @param {object} req The Request object
  * @param {object} req.query
@@ -94,7 +83,7 @@ const extractParamsFrom = req => {
   return {
     customHeaders,
     device: url.slice(1, 2),
-    url: extractURLFrom({query, url})
+    url
   }
 }
 
