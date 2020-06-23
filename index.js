@@ -2,9 +2,10 @@ const IS_LOCAL_TEST = !process.env.AWS_LAMBDA_FUNCTION_VERSION
 
 const puppeteer = require(IS_LOCAL_TEST ? 'puppeteer' : 'puppeteer-core')
 const chrome = IS_LOCAL_TEST ? {} : require('chrome-aws-lambda')
-const urlFromArgs = IS_LOCAL_TEST ? process.argv[2] : ''
 
 const cssPurge = require('css-purge')
+const qs = require('querystring')
+
 const {devices} = require('./config')
 
 async function extractCssWithCoverageFromUrl({
@@ -57,10 +58,11 @@ async function extractCssWithCoverageFromUrl({
   })
 }
 
-module.exports = async (req = {url: ''}, res) => {
+module.exports = async (req, res) => {
+  const qs = querystring.parse(req.url.split('?')[1])
+  const {url} = qs
   // https://critical-css.com/m/https://milanuncios.com
   const device = req.url.slice(1, 2)
-  const url = req.url.slice(3) || urlFromArgs
   const customHeaders = req.headers
   // get the deviceInfo depending on the device path used, by default is mobile
   const {width, height, userAgent} = devices[device] || devices.m
