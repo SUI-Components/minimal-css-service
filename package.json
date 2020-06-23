@@ -7,21 +7,28 @@
     "deploy": "npx now",
     "dev": "ENV=dev nodemon dev.js"
   },
+  "engines": {
+    "node": "12.x"
+  },
   "license": "MIT",
   "dependencies": {
     "chrome-aws-lambda": "1.12.0",
-    "css-purge": "3.1.7",
+    "css-purge": "3.1.8",
     "puppeteer-core": "1.12.2"
   },
   "devDependencies": {
-    "@s-ui/lint": "2",
-    "nodemon": "1.18.10",
-    "now": "14.0.0",
+    "@s-ui/lint": "3",
+    "nodemon": "2.0.4",
+    "now": "19.1.1",
     "puppeteer": "1.12.2"
   },
   "eslintConfig": {
     "extends": [
       "./node_modules/@s-ui/lint/eslintrc.js"
     ]
+  },
+  "prettier": "./node_modules/@s-ui/lint/.prettierrc.js",
+  "stylelint": {
+    "extends": "./node_modules/@s-ui/lint/stylelint.config.js"
   }
 }
