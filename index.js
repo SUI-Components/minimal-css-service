@@ -63,6 +63,9 @@ module.exports = async (req, res) => {
   const {url} = query
   // https://critical-css.com/m/https://milanuncios.com
   const device = req.url.slice(1, 2)
+
+  console.log(`Using ${url} with device ${device}`)
+
   const customHeaders = req.headers
   // get the deviceInfo depending on the device path used, by default is mobile
   const {width, height, userAgent} = devices[device] || devices.m
