@@ -1,25 +1,28 @@
-const {ENV} = process.env
-const puppeteer = require(ENV && ENV === 'dev' ? 'puppeteer' : 'puppeteer-core')
-const chrome = require('chrome-aws-lambda')
+const IS_LOCAL_TEST = !process.env.AWS_LAMBDA_FUNCTION_VERSION
+
+const puppeteer = require(IS_LOCAL_TEST ? 'puppeteer' : 'puppeteer-core')
+const chrome = IS_LOCAL_TEST ? {} : require('chrome-aws-lambda')
+const urlFromArgs = IS_LOCAL_TEST ? process.argv[2] : ''
+
 const cssPurge = require('css-purge')
+const {devices} = require('./config')
 
 async function extractCssWithCoverageFromUrl({
-  url,
-  width,
+  customHeaders,
   height,
+  url,
   userAgent,
-  customHeaders
+  width
 }) {
   // Setup a browser instance
   const browser = await puppeteer.launch({
     args: chrome.args,
     executablePath: await chrome.executablePath,
-    headless: true
+    headless: chrome.headless
   })
-
   // Create a new page and navigate to it
   const page = await browser.newPage()
-
+  // Set viewport depending
   await page.setViewport({width, height})
   await page.setUserAgent(userAgent)
   customHeaders && (await page.setExtraHTTPHeaders(customHeaders))
@@ -54,43 +57,21 @@ async function extractCssWithCoverageFromUrl({
   })
 }
 
-const devices = {
-  m: {
-    userAgent:
-      'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.109 Mobile Safari/537.36',
-    width: 360,
-    height: 640
-  },
-  t: {
-    userAgent:
-      'Mozilla/5.0 (iPad; CPU OS 11_0 like Mac OS X) AppleWebKit/604.1.34 (KHTML, like Gecko) Version/11.0 Mobile/15A5341f Safari/604.1',
-    width: 768,
-    height: 1024
-  },
-  d: {
-    userAgent:
-      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.109 Safari/537.36',
-    width: 1024,
-    height: 768
-  }
-}
-
-module.exports = async (req, res) => {
+module.exports = async (req = {url: ''}, res) => {
   // https://critical-css.com/m/https://milanuncios.com
-
   const device = req.url.slice(1, 2)
-  const url = req.url.slice(3)
+  const url = req.url.slice(3) || urlFromArgs
   const customHeaders = req.headers
   // get the deviceInfo depending on the device path used, by default is mobile
   const {width, height, userAgent} = devices[device] || devices.m
 
   try {
     const css = await extractCssWithCoverageFromUrl({
-      url,
-      width,
+      customHeaders,
       height,
+      url,
       userAgent,
-      customHeaders
+      width
     })
 
     res.statusCode = 200
