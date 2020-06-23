@@ -26,7 +26,11 @@ async function extractCssWithCoverageFromUrl({
   // Set viewport depending
   await page.setViewport({width, height})
   await page.setUserAgent(userAgent)
-  customHeaders && (await page.setExtraHTTPHeaders(customHeaders))
+
+  const hasCustomHeaders =
+    typeof customHeaders === 'object' && Object.keys(customHeaders).length
+  hasCustomHeaders && (await page.setExtraHTTPHeaders(customHeaders))
+
   await page.coverage.startCSSCoverage()
 
   const response = await page.goto(url, {waitUntil: 'networkidle0'})
@@ -60,13 +64,30 @@ async function extractCssWithCoverageFromUrl({
 
 module.exports = async (req, res) => {
   const query = qs.parse(req.url.split('?')[1])
-  const {url} = query
+  const {extraHeaders = '', url} = query
   // https://critical-css.com/m/https://milanuncios.com
   const device = req.url.slice(1, 2)
 
-  console.log(`Using ${url} with device ${device}`)
+  console.log(
+    `Using ${url} with device ${device} with extraHeaders: ${extraHeaders}`
+  )
 
-  const customHeaders = req.headers
+  // get all extra headers and transform to lower case
+  const extraHTTPHeadersToSet = extraHeaders
+    .split(',')
+    .map(h => h.toLowerCase())
+
+  // extract only the needed custom extra headers to set
+  const customHeaders = Object.fromEntries(
+    Object.entries(req.headers).filter(([header]) =>
+      extraHTTPHeadersToSet.includes(header)
+    )
+  )
+
+  console.log(
+    `Custom Extra Headers to bet set ${JSON.stringify(customHeaders)}`
+  )
+
   // get the deviceInfo depending on the device path used, by default is mobile
   const {width, height, userAgent} = devices[device] || devices.m
 
