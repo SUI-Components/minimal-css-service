@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const IS_LOCAL_TEST = !process.env.AWS_LAMBDA_FUNCTION_VERSION
 
 const puppeteer = require(IS_LOCAL_TEST ? 'puppeteer' : 'puppeteer-core')
@@ -62,31 +63,32 @@ async function extractCssWithCoverageFromUrl({
   })
 }
 
+function getExtraHTTPHeaders(headers) {
+  let headersToSet
+
+  try {
+    headersToSet = JSON.parse(decodeURIComponent(headers))
+  } catch (err) {
+    console.error(err)
+  }
+
+  return headersToSet
+}
+
 module.exports = async (req, res) => {
   const query = qs.parse(req.url.split('?')[1])
   const {extraHeaders = '', url} = query
-  // https://critical-css.com/m/https://milanuncios.com
+  // https://get-critical-css-service.vercel.app/m?url=https://milanuncios.com
   const device = req.url.slice(1, 2)
 
-  console.log(
-    `Using ${url} with device ${device} with extraHeaders: ${extraHeaders}`
-  )
+  console.log(`Using ${url} with device ${device}`)
 
-  // get all extra headers and transform to lower case
-  const extraHTTPHeadersToSet = extraHeaders
-    .split(',')
-    .map(h => h.toLowerCase())
+  const hasExtraHeaders =
+    typeof extraHeaders === 'string' && Boolean(extraHeaders)
+  // get all extra headers
+  const customHeaders = hasExtraHeaders && getExtraHTTPHeaders(extraHeaders)
 
-  // extract only the needed custom extra headers to set
-  const customHeaders = Object.fromEntries(
-    Object.entries(req.headers).filter(([header]) =>
-      extraHTTPHeadersToSet.includes(header)
-    )
-  )
-
-  console.log(
-    `Custom Extra Headers to bet set ${JSON.stringify(customHeaders)}`
-  )
+  customHeaders && console.log('Custom headers to be set:', customHeaders)
 
   // get the deviceInfo depending on the device path used, by default is mobile
   const {width, height, userAgent} = devices[device] || devices.m
