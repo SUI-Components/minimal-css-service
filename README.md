@@ -20,15 +20,10 @@ Run `npm run dev` to run a local version of the function for local testing.
 
 ## Optional headers to the destination URL
 
-You can optionally add all the custom HTTP headers you want to this service request, that way your destination URL request will have also such headers. See the following example:
+You can optionally add all the custom HTTP headers you want to this service request by attaching them in a encoded query string named `extraHeaders`, that way your destination URL request will have also such headers. See the following example:
 
 ```
-GET: https://critical-css-service.now.sh/m/https://my-website.com/
-
-HEADERS:
-{
-	"X-Custom-Token": "123456"
-}
+https://get-critical-css-service.vercel.app/m?extraHeaders=%7B%22X-Custom-Token%22%3A%22123456%22%7D
 ```
 
 ## Deployment
